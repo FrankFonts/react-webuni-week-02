@@ -1,19 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import generateRandomCardDeck from './generateRandomCardDeck';
 import Card from './Card';
 
+export default function Deck({ numberOfCards }) {
 
-export default function Deck({ numberOfCards, numberOfCardTypes }) {
-
-    const [deck, setDeck] = useState(generateRandomCardDeck(numberOfCards, numberOfCardTypes))
+    const [deck, setDeck] = useState()
     const [gameStatus, setGameStatus] = useState(true);
     const [selectedCard, setSelectedCard] = useState();
     const [gameMessage, setGameMessage] = useState('Click...');
 
+    useEffect(() => {
+        setDeck(generateRandomCardDeck(numberOfCards))
+    }, [numberOfCards])
+
     function cardClicked(index) {
         if (deck[index]['clickable'] && gameStatus) {
-
-            console.log('clicked')
 
             const tempDeck = [...deck];
 
@@ -27,7 +28,13 @@ export default function Deck({ numberOfCards, numberOfCardTypes }) {
 
             if (selectedCard) {
                 if (selectedCard.cardType === tempDeck[index]['cardType']) {
-                    setGameMessage('Yay!')
+                    const stillToDiscover = tempDeck.filter((card) => !card.visible).length;
+                    if (stillToDiscover === 0) {
+                        setGameMessage(`You won! Good job!`);
+                    } else {
+                        setGameMessage(`Yay! ${stillToDiscover} cards to go!`);
+                    }
+
                     tempDeck[index]['clickable'] = false;
                     tempDeck[selectedCard.index]['clickable'] = false;
                     setSelectedCard();
@@ -50,13 +57,6 @@ export default function Deck({ numberOfCards, numberOfCardTypes }) {
             }
 
             setDeck(tempDeck);
-
-
-            // TODO: send message when deck is DONE
-            const stillToDiscover = tempDeck.map((card) => !card.visible).length;
-            console.log(`stillToDiscover: ${stillToDiscover} card`)
-
-
         }
     }
 
