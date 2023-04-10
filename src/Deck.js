@@ -4,14 +4,15 @@ import Card from './Card';
 
 export default function Deck({ numberOfCards }) {
 
-    const [deck, setDeck] = useState()
+    const [deck, setDeck] = useState([])
     const [gameStatus, setGameStatus] = useState(true);
+    const [gameComplete, setGameComplete] = useState(false);
     const [selectedCard, setSelectedCard] = useState();
     const [gameMessage, setGameMessage] = useState('Click...');
 
     useEffect(() => {
-        setDeck(generateRandomCardDeck(numberOfCards))
-    }, [numberOfCards])
+        setDeck(generateRandomCardDeck(numberOfCards));
+    }, [setDeck, numberOfCards])
 
     function cardClicked(index) {
         if (deck[index]['clickable'] && gameStatus) {
@@ -31,6 +32,7 @@ export default function Deck({ numberOfCards }) {
                     const stillToDiscover = tempDeck.filter((card) => !card.visible).length;
                     if (stillToDiscover === 0) {
                         setGameMessage(`You won! Good job!`);
+                        setGameComplete(true);
                     } else {
                         setGameMessage(`Yay! ${stillToDiscover} cards to go!`);
                     }
@@ -60,15 +62,17 @@ export default function Deck({ numberOfCards }) {
         }
     }
 
-    if (!deck) return (
-        <div className='deck'>
-            <h1 className='gameMessage'>No cards, no fun</h1>
-        </div>
-    )
+    function newDeck() {
+        setDeck(generateRandomCardDeck(numberOfCards));
+        setGameComplete(false);
+    }
 
     return (
         <div className='deck'>
-            <h1 className='gameMessage'>{gameMessage}</h1>
+            <header>
+                <h1 className='gameMessage'>{gameMessage}</h1>
+                {gameComplete ? <button onClick={newDeck}>New Game</button> : null}
+            </header>
             {deck.map((card) => <Card key={card.index} card={card} onClick={cardClicked} />)}
         </div>
     )
